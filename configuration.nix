@@ -7,6 +7,7 @@
 
 let
   nix-flatpak = builtins.fetchTarball "https://github.com/gmodena/nix-flatpak/archive/refs/tags/v0.7.0.tar.gz";
+  
 in
 {
   imports =
@@ -98,12 +99,41 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.sherry = {
     isNormalUser = true;
+    shell = pkgs.zsh;
     description = "Shaheer Ahmed";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
     ];
+  };
+
+  fonts.packages = with pkgs; [
+    nerd-fonts.fira-code
+    nerd-fonts.meslo-lg
+  ];
+
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    
+    # These plugins are game-changers
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+
+    # Oh My Zsh framework
+    ohMyZsh = {
+      enable = true;
+      plugins = [
+        "git"      # Git aliases and status
+        "sudo"     # Press ESC twice to add 'sudo' to your command
+        "history"  # Better history management
+        "z"        # Jump to frequently used directories quickly
+      ];
+      
+      # 'agnoster' is a classic, beautiful theme that uses Powerline fonts
+      theme = "random"; # maran, simonoff
+    };
   };
 
   # Install firefox.
@@ -131,11 +161,13 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  wget
+  nix-your-shell
+	wget
 	fastfetch
 	google-chrome
 	git
 	vscode
+  alacritty
   zoom-us
   nodejs
   jdk11
@@ -153,6 +185,21 @@ in
   libreoffice-fresh
   hunspell
   hunspellDicts.en_US
+  ciscoPacketTracer8
+  (pkgs.writeShellScriptBin "packettracer-offline" ''
+      exec ${pkgs.util-linux}/bin/unshare -r -n ${pkgs.ciscoPacketTracer8}/bin/packettracer8 "$@"
+  '')
+
+  # 2. Create the Desktop Shortcut to run that custom command
+  (makeDesktopItem {
+    name = "packettracer-offline-gui";
+    desktopName = "Cisco Packet Tracer (Offline)";
+    exec = "packettracer-offline %f"; 
+    icon = "cisco-packet-tracer-8"; 
+    terminal = false;
+    type = "Application";
+    categories = [ "Network" ];
+  })
   (pkgs.writeShellScriptBin "opencode" ''
       exec ${pkgs.nodejs}/bin/npx -y opencode-ai@1.15.3 "$@"
   '')
