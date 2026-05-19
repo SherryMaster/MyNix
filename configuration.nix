@@ -165,12 +165,19 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+  # --- C/C++ Global Toolchain ---
+  gcc           # GNU Compiler Collection
+  gnumake       # Make build automation
+  cmake         # CMake build system
+  gdb           # GNU Debugger
+  clang-tools   # Provides clangd for IDE autocompletion
+  # ------------------------------
   nix-your-shell
-	wget
-	fastfetch
-	google-chrome
-	git
-	vscode
+  wget
+  fastfetch
+  google-chrome
+  git
+  vscode
   alacritty
   zoom-us
   nodejs
