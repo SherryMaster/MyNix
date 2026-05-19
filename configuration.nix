@@ -156,7 +156,10 @@ in
   environment.sessionVariables = {
     # Forces LibreOffice to use GTK3 or Qt5/6 positioning and styling
     # Use "gtk3" for GNOME/XFCE or "kf5" / "qt6" for KDE Plasma
-    SAL_USE_VCLPLUGIN = "qt6"; 
+    SAL_USE_VCLPLUGIN = "qt6";
+
+    # Declare SPARK_HOME globally
+    SPARK_HOME = "${pkgs.spark}";
   };
 
   # List packages installed in system profile. To search, run:
@@ -174,9 +177,11 @@ in
   jdk11
   docker-compose
   apacheKafka
+  spark
   (python3.withPackages (ps: with ps; [ 
       pip 
-      virtualenv 
+      virtualenv
+      pyspark
   ]))
   jetbrains.pycharm
   htop
