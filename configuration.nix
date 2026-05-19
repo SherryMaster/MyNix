@@ -101,11 +101,12 @@ in
     isNormalUser = true;
     shell = pkgs.zsh;
     description = "Shaheer Ahmed";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker"];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
     ];
+    linger = true;
   };
 
   fonts.packages = with pkgs; [
@@ -171,6 +172,7 @@ in
   zoom-us
   nodejs
   jdk11
+  docker-compose
   (python3.withPackages (ps: with ps; [ 
       pip 
       virtualenv 
@@ -219,6 +221,21 @@ in
 
   # Enable Waydroid
   virtualisation.waydroid.enable = true;
+  
+  # Enable the Docker daemon
+  virtualisation.docker.enable = false;
+
+  # Auto-Pruning (Save Disk Space)
+  virtualisation.docker.autoPrune = {
+    enable = true;
+    dates = "weekly";
+  };
+
+  # Start docker in rootless for security
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true; # Points the 'docker' CLI to the rootless socket
+  };
 
   systemd.services.waydroid-container = {
     serviceConfig = {
