@@ -223,7 +223,10 @@ in
     categories = [ "Network" ];
   })
   (pkgs.writeShellScriptBin "opencode" ''
-      exec ${pkgs.nodejs}/bin/npx -y opencode-ai@1.15.3 "$@"
+      exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
+  '')
+  (pkgs.writeShellScriptBin "gemini" ''
+      exec ${pkgs.nodejs}/bin/npx -y @google/gemini-cli@latest "$@"
   '')
  ];
   services.ratbagd.enable = true;
