@@ -140,7 +140,7 @@ in
       ];
       
       # 'agnoster' is a classic, beautiful theme that uses Powerline fonts
-      theme = "random"; # maran, simonoff, bureau
+      theme = "random"; # maran, simonoff, bureau, jonathan
     };
   };
 
@@ -225,8 +225,23 @@ in
   (pkgs.writeShellScriptBin "opencode" ''
       exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
   '')
-  (pkgs.writeShellScriptBin "gemini" ''
-      exec ${pkgs.nodejs}/bin/npx -y @google/gemini-cli@latest "$@"
+  (pkgs.writeShellScriptBin "agy" ''
+      # Define the exact path to the actual downloaded Go binary
+      AGY_BIN="$HOME/.local/bin/agy"
+      
+      # Check if the actual binary exists, bypassing the wrapper's PATH
+      if [ ! -f "$AGY_BIN" ]; then
+          echo "Antigravity CLI not found locally. Installing via official script..."
+          ${pkgs.curl}/bin/curl -fsSL https://antigravity.google/cli/install.sh | bash
+          
+          # Fallback if the installer places it in the gemini directory instead
+          if [ ! -f "$AGY_BIN" ] && [ -f "$HOME/.gemini/antigravity-cli/bin/agy" ]; then
+              AGY_BIN="$HOME/.gemini/antigravity-cli/bin/agy"
+          fi
+      fi
+      
+      # Execute the absolute path to prevent infinite loops
+      exec "$AGY_BIN" "$@"
   '')
  ];
   services.ratbagd.enable = true;
