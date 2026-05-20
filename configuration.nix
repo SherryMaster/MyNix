@@ -31,6 +31,10 @@ in
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # Enable Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   # Set your time zone.
   time.timeZone = "Asia/Karachi";
 
@@ -133,7 +137,7 @@ in
       ];
       
       # 'agnoster' is a classic, beautiful theme that uses Powerline fonts
-      theme = "random"; # maran, simonoff
+      theme = "random"; # maran, simonoff, bureau
     };
   };
 
