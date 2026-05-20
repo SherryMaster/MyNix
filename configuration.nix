@@ -35,6 +35,9 @@ in
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
 
+  # Enable input daemon for Nintendo Switch Pro Controllers & Joy-Cons
+  services.joycond.enable = true;
+
   # Set your time zone.
   time.timeZone = "Asia/Karachi";
 
