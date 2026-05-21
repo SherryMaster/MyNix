@@ -140,7 +140,7 @@ in
       ];
       
       # 'agnoster' is a classic, beautiful theme that uses Powerline fonts
-      theme = "random"; # maran, simonoff, bureau, jonathan
+      theme = "jonathan"; # maran, simonoff, bureau, jonathan
     };
   };
 
@@ -182,7 +182,13 @@ in
   nix-your-shell
   wget
   fastfetch
-  google-chrome
+  (google-chrome.override {
+      commandLineArgs = [
+        "--enable-features=NativeNotifications"
+        "--ozone-platform-hint=auto"
+        "--enable-wayland-ime"
+      ];
+    })
   git
   vscode
   alacritty
