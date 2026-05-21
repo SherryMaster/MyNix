@@ -205,6 +205,7 @@ in
   piper
   wasistlos
   libreoffice-fresh
+  libnotify
   hunspell
   hunspellDicts.en_US
   ciscoPacketTracer8
@@ -267,6 +268,10 @@ in
   virtualisation.docker.autoPrune = {
     enable = true;
     dates = "weekly";
+  };
+
+  virtualisation.docker.daemon.settings = {
+    dns = [ "8.8.8.8" "8.8.4.4" ];
   };
 
   # Start docker in rootless for security
@@ -436,22 +441,22 @@ in
 
   # --- APACHE KAFKA (KRaft Mode) ---
   
-  services.apache-kafka = {
-    enable = true;
-    clusterId = "muFUCn_OSq-6It9LTWlY1g"; 
-    formatLogDirs = true; 
+  # services.apache-kafka = {
+  #   enable = true;
+  #   clusterId = "muFUCn_OSq-6It9LTWlY1g"; 
+  #   formatLogDirs = true; 
 
-    settings = {
-      "node.id" = 1;
-      "process.roles" = [ "broker" "controller" ];
-      "controller.listener.names" = [ "CONTROLLER" ];
-      "controller.quorum.voters" = [ "1@127.0.0.1:9093" ];
-      "listeners" = [ "PLAINTEXT://127.0.0.1:9092" "CONTROLLER://127.0.0.1:9093" ];
-      "listener.security.protocol.map" = [ "CONTROLLER:PLAINTEXT" "PLAINTEXT:PLAINTEXT" ];
-      "log.dirs" = [ "/var/lib/kafka/logs" ];
-      "offsets.topic.replication.factor" = 1;
-    };
-  };
+  #   settings = {
+  #     "node.id" = 1;
+  #     "process.roles" = [ "broker" "controller" ];
+  #     "controller.listener.names" = [ "CONTROLLER" ];
+  #     "controller.quorum.voters" = [ "1@127.0.0.1:9093" ];
+  #     "listeners" = [ "PLAINTEXT://127.0.0.1:9092" "CONTROLLER://127.0.0.1:9093" ];
+  #     "listener.security.protocol.map" = [ "CONTROLLER:PLAINTEXT" "PLAINTEXT:PLAINTEXT" ];
+  #     "log.dirs" = [ "/var/lib/kafka/logs" ];
+  #     "offsets.topic.replication.factor" = 1;
+  #   };
+  # };
   # --------------------------------------
 
   # Some programs need SUID wrappers, can be configured further or are
