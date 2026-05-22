@@ -108,7 +108,7 @@ in
     isNormalUser = true;
     shell = pkgs.zsh;
     description = "Shaheer Ahmed";
-    extraGroups = [ "networkmanager" "wheel" "docker"];
+    extraGroups = [ "networkmanager" "wheel" "docker" "vboxusers"];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
@@ -215,6 +215,7 @@ in
   hunspell
   hunspellDicts.en_US
   ciscoPacketTracer8
+  vlc
   (pkgs.writeShellScriptBin "packettracer-offline" ''
       exec ${pkgs.util-linux}/bin/unshare -r -n ${pkgs.ciscoPacketTracer8}/bin/packettracer8 "$@"
   '')
@@ -250,11 +251,68 @@ in
       # Execute the absolute path to prevent infinite loops
       exec "$AGY_BIN" "$@"
   '')
+  (pkgs.stdenv.mkDerivation {
+      pname = "m913-ctl";
+      version = "latest";
+
+      src = pkgs.fetchFromGitHub {
+        owner = "Qehbr";
+        repo = "m913-ctl";
+        rev = "main"; 
+        hash = "sha256-ajThk3yoIXeIXmu4KhOHSCLAp0U/cTSA8R/LLifocgY="; 
+      };
+
+      nativeBuildInputs = [ pkgs.cmake pkgs.pkg-config ];
+      buildInputs = [ pkgs.libusb1 ];
+    })
+           # Create an executable wrapper using a Python environment that includes pygobject3
+  (pkgs.stdenv.mkDerivation {
+      pname = "m913-ctl-gui";
+      version = "latest";
+
+      src = pkgs.fetchFromGitHub {
+        owner = "brunofin";
+        repo = "m913-ctl-gui";
+        rev = "main";
+        hash = "sha256-uEXCNlX0ok5g6QU8OhwYMvoS88QF8RXYFvliyD1dt04=";
+      };
+
+      nativeBuildInputs = [ 
+        pkgs.makeWrapper 
+        pkgs.wrapGAppsHook4 
+        pkgs.gobject-introspection 
+      ];
+      
+      buildInputs = [ 
+        pkgs.gtk4 
+        pkgs.libadwaita 
+      ];
+
+      installPhase = ''
+        mkdir -p $out/bin $out/opt/m913-ctl-gui
+        
+        # Copy the python source files
+        cp -r m913_gui run.py $out/opt/m913-ctl-gui/
+        
+        # Create an executable wrapper using a Python environment that includes pygobject3
+        makeWrapper ${pkgs.python3.withPackages (p: [ p.pygobject3 ])}/bin/python3 $out/bin/m913-ctl-gui \
+          --add-flags "$out/opt/m913-ctl-gui/run.py" \
+          "''${gappsWrapperArgs[@]}"
+      '';
+    })
  ];
   services.ratbagd.enable = true;
   services.flatpak.packages = [
     "org.vinegarhq.Sober"
   ];
+
+  # Udev rules to allow non-root user configuration of the M913
+  services.udev.extraRules = ''
+    # Redragon M913 Impact Elite (2.4GHz Wireless)
+    SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa07", MODE="0666"
+    # Redragon M913 Impact Elite (Wired)
+    SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa08", MODE="0666"
+  '';
 
   services.hardware.openrgb = {
     enable = true;
@@ -263,6 +321,12 @@ in
 
   # Allow exprimental features
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Enable the VirtualBox host daemon and kernel modules
+  virtualisation.virtualbox.host.enable = true;
+
+  # OPTIONAL BUT RECOMMENDED: Enable Oracle Extension Pack for USB 2.0/3.0 and webcam support.
+  virtualisation.virtualbox.host.enableExtensionPack = true;
 
   # Enable Waydroid
   virtualisation.waydroid.enable = true;
@@ -444,6 +508,32 @@ in
   programs.gamescope.enable = true;
 
   systemd.services.waydroid-container.wantedBy = [ "multi-user.target" ];
+
+  # Permanent mount for the 'Soft' drive
+  fileSystems."/mnt/Soft" = {
+    device = "/dev/disk/by-uuid/EA282ACC282A9799";
+    fsType = "ntfs-3g";
+    options = [ 
+      "rw"
+      "uid=1000"
+      "gid=100"
+      "nofail"
+      "x-systemd.device-timeout=5s"
+    ];
+  };
+
+  # Permanent mount for the 'Data' drive (Optional, but recommended)
+  fileSystems."/mnt/Data" = {
+    device = "/dev/disk/by-uuid/1C1839B518398EB0";
+    fsType = "ntfs-3g";
+    options = [ 
+      "rw"
+      "uid=1000"
+      "gid=100"
+      "nofail"
+      "x-systemd.device-timeout=5s"
+    ];
+  };
 
   # --- APACHE KAFKA (KRaft Mode) ---
   
