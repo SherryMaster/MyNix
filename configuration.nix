@@ -187,6 +187,7 @@ in
   nix-your-shell
   wget
   fastfetch
+  jq
   (google-chrome.override {
       commandLineArgs = [
         "--enable-features=NativeNotifications"
@@ -223,12 +224,31 @@ in
   vlc
   unstable.cisco-packet-tracer_9
   unstable.godot
+  # 1. Create the executable wrapper that drops network access
+  (pkgs.writeShellScriptBin "packettracer-offline" ''
+      # Dynamically fetch the binary to prevent hardcoded naming mismatches
+      PT_BIN=(${unstable.cisco-packet-tracer_9}/bin/*)
+      
+      # Run as a transient systemd SERVICE (not scope) to allow PrivateNetwork=yes.
+      # We explicitly pass the display environment variables so the GUI can render.
+      exec systemd-run \
+        --user \
+        --wait \
+        --property=PrivateNetwork=yes \
+        --setenv=DISPLAY="''${DISPLAY:-}" \
+        --setenv=WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-}" \
+        --setenv=XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-}" \
+        --setenv=XAUTHORITY="''${XAUTHORITY:-}" \
+        --setenv=DBUS_SESSION_BUS_ADDRESS="''${DBUS_SESSION_BUS_ADDRESS:-}" \
+        "''${PT_BIN[0]}" "$@"
+  '')
+
   # 2. Create the Desktop Shortcut to run that custom command
   (makeDesktopItem {
     name = "packettracer-offline-gui";
     desktopName = "Cisco Packet Tracer (Offline)";
     exec = "packettracer-offline %f"; 
-    icon = "cisco-packet-tracer-8"; 
+    icon = "cisco-packet-tracer-9"; 
     terminal = false;
     type = "Application";
     categories = [ "Network" ];
