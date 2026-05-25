@@ -7,6 +7,11 @@
 
 let
   nix-flatpak = builtins.fetchTarball "https://github.com/gmodena/nix-flatpak/archive/refs/tags/v0.7.0.tar.gz";
+
+  # Define the unstable channel declaratively
+  unstable = import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz") {
+    config = config.nixpkgs.config;
+  };
   
 in
 {
@@ -205,6 +210,7 @@ in
   ]))
   jetbrains.pycharm
   htop
+  btop
   waydroid
   waydroid-helper
   unzip
@@ -216,6 +222,7 @@ in
   hunspellDicts.en_US
   ciscoPacketTracer8
   vlc
+  unstable.godot
   (pkgs.writeShellScriptBin "packettracer-offline" ''
       exec ${pkgs.util-linux}/bin/unshare -r -n ${pkgs.ciscoPacketTracer8}/bin/packettracer8 "$@"
   '')
@@ -304,6 +311,7 @@ in
   services.ratbagd.enable = true;
   services.flatpak.packages = [
     "org.vinegarhq.Sober"
+    "org.freedownloadmanager.Manager"
   ];
 
   # Udev rules to allow non-root user configuration of the M913
@@ -313,6 +321,14 @@ in
     # Redragon M913 Impact Elite (Wired)
     SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa08", MODE="0666"
   '';
+
+  # Grant Free Download Manager access to mounted drives
+  services.flatpak.overrides = {
+    "org.freedownloadmanager.Manager".Context.filesystems = [
+      "/mnt/Soft"
+      "/mnt/Data" # Adding your other drive here too just in case!
+    ];
+  };
 
   services.hardware.openrgb = {
     enable = true;
@@ -476,21 +492,6 @@ in
       # Forces touch emulation profile so game clients pass the splash screen loading cycle
       ${pkgs.waydroid}/bin/waydroid prop set persist.waydroid.fake_touch com.roblox.client
     '';
-  };
-
-  systemd.services.install-fdm-flatpak = {
-    description = "Declaratively install Free Download Manager via Flatpak";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = ''
-        ${pkgs.flatpak}/bin/flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        ${pkgs.flatpak}/bin/flatpak install --system -y flathub org.freedownloadmanager.Manager
-      '';
-      RemainAfterExit = true;
-    };
   };
 
   programs.nix-ld.enable = true;
