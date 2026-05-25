@@ -220,13 +220,9 @@ in
   libnotify
   hunspell
   hunspellDicts.en_US
-  ciscoPacketTracer8
   vlc
+  unstable.cisco-packet-tracer_9
   unstable.godot
-  (pkgs.writeShellScriptBin "packettracer-offline" ''
-      exec ${pkgs.util-linux}/bin/unshare -r -n ${pkgs.ciscoPacketTracer8}/bin/packettracer8 "$@"
-  '')
-
   # 2. Create the Desktop Shortcut to run that custom command
   (makeDesktopItem {
     name = "packettracer-offline-gui";
@@ -239,24 +235,6 @@ in
   })
   (pkgs.writeShellScriptBin "opencode" ''
       exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
-  '')
-  (pkgs.writeShellScriptBin "agy" ''
-      # Define the exact path to the actual downloaded Go binary
-      AGY_BIN="$HOME/.local/bin/agy"
-      
-      # Check if the actual binary exists, bypassing the wrapper's PATH
-      if [ ! -f "$AGY_BIN" ]; then
-          echo "Antigravity CLI not found locally. Installing via official script..."
-          ${pkgs.curl}/bin/curl -fsSL https://antigravity.google/cli/install.sh | bash
-          
-          # Fallback if the installer places it in the gemini directory instead
-          if [ ! -f "$AGY_BIN" ] && [ -f "$HOME/.gemini/antigravity-cli/bin/agy" ]; then
-              AGY_BIN="$HOME/.gemini/antigravity-cli/bin/agy"
-          fi
-      fi
-      
-      # Execute the absolute path to prevent infinite loops
-      exec "$AGY_BIN" "$@"
   '')
   (pkgs.stdenv.mkDerivation {
       pname = "m913-ctl";
@@ -574,6 +552,11 @@ in
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  # Set /etc/nixos and its contents to be group-writable by wheel
+  systemd.tmpfiles.rules = [
+    "Z /etc/nixos 0775 root wheel - -"
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
