@@ -51,6 +51,7 @@ in
     ".agents/skills/pdf".source = "${anthropicSkillRepo}/skills/pdf";
     ".agents/skills/docx".source = "${anthropicSkillRepo}/skills/docx";
     ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
+    ".agents/skills/webapp-testing".source = "${anthropicSkillRepo}/skills/webapp-testing";
   };
 
   # --- USER PROGRAMS & DOTFILES ---
