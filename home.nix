@@ -1,5 +1,13 @@
 { config, pkgs, ... }:
 
+let
+    anthropicSkillRepo = pkgs.fetchFromGitHub{
+        owner = "anthropics";
+        repo = "skills";
+        rev = "main";
+        hash = "sha256-GMXFJSePrpEvhzMQ82YI9Z10BDkuFK/lXUDELclvQ4c="; 
+    };
+in
 {
   # Define your user details
   home.username = "sherry";
@@ -35,6 +43,15 @@
     htop
     btop
   ];
+
+  home.file = {
+    # Antropic skills
+    ".agents/skills/frontend-design".source = "${anthropicSkillRepo}/skills/frontend-design";
+    ".agents/skills/pptx".source = "${anthropicSkillRepo}/skills/pptx";
+    ".agents/skills/pdf".source = "${anthropicSkillRepo}/skills/pdf";
+    ".agents/skills/docx".source = "${anthropicSkillRepo}/skills/docx";
+    ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
+  };
 
   # --- USER PROGRAMS & DOTFILES ---
   programs.git = {
