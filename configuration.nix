@@ -420,5 +420,24 @@ in
     "Z /etc/nixos 0775 root wheel - -"
   ];
 
+  # --- REMOTE ACCESS SETUP (Sunshine, Avahi, Tailscale) ---
+  services.sunshine = {
+    enable = true;
+    autoStart = true;
+    capSysAdmin = true; # Optimizes screen capture performance
+    openFirewall = true; # Automatically opens required streaming ports
+  };
+
+  services.avahi = {
+    enable = true;
+    publish = {
+      enable = true;
+      userServices = true;
+    };
+  };
+
+  services.tailscale.enable = true; 
+  # --------------------------------------------------------
+
   system.stateVersion = "25.11"; 
 }
