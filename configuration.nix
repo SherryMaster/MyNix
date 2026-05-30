@@ -261,6 +261,11 @@ in
     "org.freedownloadmanager.Manager"
   ];
 
+  services.flatpak.update.auto = {
+    enable = true;
+    onCalendar = "daily"; # Runs a systemd timer daily. You can also use "weekly"
+  };
+
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa07", MODE="0666"
     SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa08", MODE="0666"
@@ -371,6 +376,35 @@ in
         echo "libhoudini installed successfully."
       else
         echo "libhoudini translation layers are already active. Skipping script runtime."
+      fi
+    '';
+  };
+
+  systemd.services.init-waydroid-magisk = {
+    description = "Declarative installation of Magisk root for Waydroid";
+    after = [ "init-waydroid-images.service" ];
+    before = [ "waydroid-container.service" ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [ python3 python3Packages.pip python3Packages.virtualenv lzip unzip wget git coreutils waydroid bash ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      if [ ! -d /var/lib/waydroid/overlay/system/app/Magisk ] && [ ! -d /var/lib/waydroid/overlay/system/priv-app/Magisk ]; then
+        echo "Magisk root missing. Launching runtime environment..."
+        cd /tmp
+        rm -rf waydroid_script
+        git clone https://github.com/casualsnek/waydroid_script.git
+        cd waydroid_script
+        python3 -m venv venv
+        ./venv/bin/pip install -r requirements.txt
+        ./venv/bin/python3 main.py install magisk
+        cd /tmp
+        rm -rf waydroid_script
+        echo "Magisk installed successfully."
+      else
+        echo "Magisk is already active. Skipping script runtime."
       fi
     '';
   };
