@@ -174,6 +174,7 @@ in
   docker-compose
   apacheKafka
   spark
+  flameshot
   (python3.withPackages (ps: with ps; [ 
       pip 
       virtualenv
@@ -318,6 +319,7 @@ in
   programs.gamemode.enable = true;
   programs.gamescope.enable = true;
 
+  virtualisation.waydroid.enable = true;
   systemd.services.waydroid-container.wantedBy = [ "multi-user.target" ];
 
   fileSystems."/mnt/Soft" = {
