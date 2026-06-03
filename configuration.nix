@@ -13,7 +13,7 @@ let
   };
   
   # Fetch Home Manager source (Pinned to match your system version)
-  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-26.05.tar.gz";
   
 in
 {
@@ -180,11 +180,9 @@ in
       virtualenv
       pyspark
   ]))
-  waydroid
-  waydroid-helper
   unzip
   piper
-  wasistlos
+  karere
   libnotify
   hunspell
   hunspellDicts.en_US
@@ -291,7 +289,6 @@ in
 
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableExtensionPack = true;
-  virtualisation.waydroid.enable = true;
   
   virtualisation.docker.enable = false;
   virtualisation.docker.autoPrune = {
@@ -304,128 +301,6 @@ in
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true; 
-  };
-
-  systemd.services.waydroid-container = {
-    serviceConfig = { Delegate = true; };
-    preStart = ''
-      mkdir -p /var/lib/waydroid
-      touch /var/lib/waydroid/waydroid_base.prop
-      sed -i '/gralloc.gbm.device/d' /var/lib/waydroid/waydroid_base.prop
-      sed -i '/ro.hardware.gralloc/d' /var/lib/waydroid/waydroid_base.prop
-      sed -i '/ro.hardware.egl/d' /var/lib/waydroid/waydroid_base.prop
-      echo "gralloc.gbm.device=/dev/dri/renderD128" >> /var/lib/waydroid/waydroid_base.prop
-      echo "ro.hardware.gralloc=gbm" >> /var/lib/waydroid/waydroid_base.prop
-      echo "ro.hardware.egl=mesa" >> /var/lib/waydroid/waydroid_base.prop
-    '';
-  };
-
-  networking.firewall.trustedInterfaces = [ "waydroid0" ];
-
-  systemd.services.init-waydroid-images = {
-    description = "Declarative download and installation of Android 11 images for Waydroid";
-    before = [ "waydroid-container.service" ];
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [ wget unzip ]; 
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      mkdir -p /var/lib/waydroid/images
-      if [ ! -f /var/lib/waydroid/images/system.img ] || [ ! -f /var/lib/waydroid/images/vendor.img ]; then
-        echo "Waydroid Android 11 images missing. Starting automated installation..."
-        cd /tmp
-        if [ ! -f system11.zip ]; then
-          echo "Downloading Android 11 system image..."
-          wget -O system11.zip "https://sourceforge.net/projects/waydroid/files/images/system/lineage/waydroid_x86_64/lineage-18.1-20250621-GAPPS-waydroid_x86_64-system.zip/download"
-        fi
-        if [ ! -f vendor11.zip ]; then
-          echo "Downloading Android 11 vendor image..."
-          wget -O vendor11.zip "https://sourceforge.net/projects/waydroid/files/images/vendor/waydroid_x86_64/lineage-18.1-20250621-MAINLINE-waydroid_x86_64-vendor.zip/download"
-        fi
-        echo "Extracting images to /var/lib/waydroid/images/..."
-        unzip -o system11.zip -d /var/lib/waydroid/images/
-        unzip -o vendor11.zip -d /var/lib/waydroid/images/
-        rm system11.zip vendor11.zip
-        echo "Waydroid Android 11 environment provisioned successfully."
-      else
-        echo "Waydroid Android 11 images are already present. Skipping download."
-      fi
-    '';
-  };
-
-  systemd.services.init-waydroid-houdini = {
-    description = "Declarative installation of libhoudini translation layer for Waydroid";
-    after = [ "init-waydroid-images.service" ];
-    before = [ "waydroid-container.service" ];
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [ python3 python3Packages.pip python3Packages.virtualenv lzip unzip wget git coreutils waydroid bash ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      if [ ! -d /var/lib/waydroid/overlay/system/lib/arm ] && [ ! -d /var/lib/waydroid/overlay/system/lib64/arm64 ]; then
-        echo "libhoudini ARM translation layer missing. Launching runtime environment..."
-        cd /tmp
-        rm -rf waydroid_script
-        git clone https://github.com/casualsnek/waydroid_script.git
-        cd waydroid_script
-        python3 -m venv venv
-        ./venv/bin/pip install -r requirements.txt
-        ./venv/bin/python3 main.py install libhoudini
-        cd /tmp
-        rm -rf waydroid_script
-        echo "libhoudini installed successfully."
-      else
-        echo "libhoudini translation layers are already active. Skipping script runtime."
-      fi
-    '';
-  };
-
-  systemd.services.init-waydroid-magisk = {
-    description = "Declarative installation of Magisk root for Waydroid";
-    after = [ "init-waydroid-images.service" ];
-    before = [ "waydroid-container.service" ];
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [ python3 python3Packages.pip python3Packages.virtualenv lzip unzip wget git coreutils waydroid bash ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      if [ ! -d /var/lib/waydroid/overlay/system/app/Magisk ] && [ ! -d /var/lib/waydroid/overlay/system/priv-app/Magisk ]; then
-        echo "Magisk root missing. Launching runtime environment..."
-        cd /tmp
-        rm -rf waydroid_script
-        git clone https://github.com/casualsnek/waydroid_script.git
-        cd waydroid_script
-        python3 -m venv venv
-        ./venv/bin/pip install -r requirements.txt
-        ./venv/bin/python3 main.py install magisk
-        cd /tmp
-        rm -rf waydroid_script
-        echo "Magisk installed successfully."
-      else
-        echo "Magisk is already active. Skipping script runtime."
-      fi
-    '';
-  };
-
-  systemd.services.waydroid-properties = {
-    description = "Apply custom engine configurations for Delta Roblox execution";
-    after = [ "waydroid-container.service" ];
-    requires = [ "waydroid-container.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      sleep 3
-      ${pkgs.waydroid}/bin/waydroid prop set persist.waydroid.fake_touch com.roblox.client
-    '';
   };
 
   programs.nix-ld.enable = true;
