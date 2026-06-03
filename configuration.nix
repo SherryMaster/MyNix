@@ -69,9 +69,9 @@ in
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # Enable the COSMIC Desktop Environment.
+  services.displayManager.cosmic-greeter.enable = true;
+  services.desktopManager.cosmic.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -154,7 +154,6 @@ in
   '';
 
   environment.sessionVariables = {
-    SAL_USE_VCLPLUGIN = "qt6";
     SPARK_HOME = "${pkgs.spark}";
   };
 
@@ -285,7 +284,11 @@ in
     package = pkgs.openrgb-with-all-plugins; 
   };
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    substituters = [ "https://cache.nixos.org" "https://cosmic.cachix.org/" ];
+    trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
+  };
 
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableExtensionPack = true;

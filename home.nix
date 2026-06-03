@@ -21,7 +21,6 @@ in
   # If you delete a line here and rebuild, it completely vanishes from your system.
   home.packages = with pkgs; [
     # GUI Applications
-    kdePackages.kate
     vscode
     alacritty
     zoom-us
