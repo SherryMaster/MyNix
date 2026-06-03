@@ -190,6 +190,10 @@ in
   hunspellDicts.en_US
   unstable.cisco-packet-tracer_9
   unstable.godot
+
+  # -- Games --
+  rrootage
+  powermanga
   
   # 1. Create the executable wrapper that drops network access
   (pkgs.writeShellScriptBin "packettracer-offline" ''
