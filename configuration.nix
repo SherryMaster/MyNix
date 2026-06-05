@@ -40,6 +40,8 @@ in
   # Enable networking
   networking.networkmanager.enable = true;
 
+  networking.firewall.trustedInterfaces = [ "waydroid0" ];
+
   # Enable Bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
@@ -175,6 +177,7 @@ in
   apacheKafka
   spark
   flameshot
+  obs-studio
   (python3.withPackages (ps: with ps; [ 
       pip 
       virtualenv
@@ -320,6 +323,7 @@ in
   programs.gamescope.enable = true;
 
   virtualisation.waydroid.enable = true;
+  virtualisation.waydroid.package = pkgs.waydroid-nftables;
   systemd.services.waydroid-container.wantedBy = [ "multi-user.target" ];
 
   fileSystems."/mnt/Soft" = {
