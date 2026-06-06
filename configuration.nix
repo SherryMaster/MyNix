@@ -177,12 +177,12 @@ in
   apacheKafka
   spark
   flameshot
-  obs-studio
   (python3.withPackages (ps: with ps; [ 
       pip 
       virtualenv
       pyspark
   ]))
+  waydroid-helper
   unzip
   piper
   karere
@@ -196,7 +196,6 @@ in
   rrootage
   powermanga
   
-  # 1. Create the executable wrapper that drops network access
   (pkgs.writeShellScriptBin "packettracer-offline" ''
       PT_BIN=(${unstable.cisco-packet-tracer_9}/bin/*)
       exec systemd-run \
@@ -211,7 +210,6 @@ in
         "''${PT_BIN[0]}" "$@"
   '')
 
-  # 2. Create the Desktop Shortcut to run that custom command
   (makeDesktopItem {
     name = "packettracer-offline-gui";
     desktopName = "Cisco Packet Tracer (Offline)";
@@ -307,7 +305,7 @@ in
   };
   virtualisation.docker.rootless = {
     enable = true;
-    setSocketVariable = true; 
+    setSocketVariable = true;
   };
 
   programs.nix-ld.enable = true;
