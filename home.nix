@@ -20,13 +20,22 @@ in
   # These are applications that only 'sherry' needs. 
   # If you delete a line here and rebuild, it completely vanishes from your system.
   home.packages = with pkgs; [
-    # GUI Applications
     vscode
     alacritty
     zoom-us
     jetbrains.pycharm
     libreoffice-fresh
     vlc
+    flameshot
+    nodejs
+    (python3.withPackages (ps: with ps; [ pip virtualenv pyspark ]))
+    libnotify
+    hunspell
+    hunspellDicts.en_US
+
+    # Games
+    rrootage
+    powermanga
     
     # Chrome with your custom Wayland flags
     (google-chrome.override {

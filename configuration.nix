@@ -171,30 +171,20 @@ in
   nix-your-shell
   wget
   jq
-  nodejs
   jdk11
   docker-compose
   apacheKafka
   spark
-  flameshot
-  (python3.withPackages (ps: with ps; [ 
-      pip 
-      virtualenv
-      pyspark
-  ]))
   waydroid-helper
   unzip
   piper
   karere
-  libnotify
-  hunspell
-  hunspellDicts.en_US
   unstable.cisco-packet-tracer_9
   unstable.godot
 
   # -- Games --
-  rrootage
-  powermanga
+  # keep system-level games here only if needed for all users
+  
   
   (pkgs.writeShellScriptBin "packettracer-offline" ''
       PT_BIN=(${unstable.cisco-packet-tracer_9}/bin/*)
