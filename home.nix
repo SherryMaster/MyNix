@@ -28,11 +28,23 @@ in
     vlc
     flameshot
     nodejs
-    (python3.withPackages (ps: with ps; [ pip virtualenv pyspark ]))
+    (python3.withPackages (ps: with ps; [ 
+      pip 
+      virtualenv 
+      pyspark
+      numpy
+      matplotlib
+      opencv-python
+      jupyter
+      ipykernel
+    ]))
     libnotify
+    nwg-clipman
+    cliphist
+    wl-clipboard
     hunspell
     hunspellDicts.en_US
-
+    antigravity
     # Games
     rrootage
     powermanga
@@ -69,6 +81,11 @@ in
       user.name = "Shaheer Ahmed"; 
       user.email = "sherrymaster2@gmail.com";
     };
+  };
+
+  # Enable cliphist for Wayland clipboard history
+  services.cliphist = {
+    enable = true;
   };
 
   # Let Home Manager manage its own installation
