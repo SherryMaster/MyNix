@@ -26,7 +26,6 @@ in
     jetbrains.pycharm
     libreoffice-fresh
     vlc
-    flameshot
     nodejs
     (python3.withPackages (ps: with ps; [ 
       pip 
@@ -37,11 +36,9 @@ in
       opencv-python
       jupyter
       ipykernel
+      ultralytics
     ]))
     libnotify
-    nwg-clipman
-    cliphist
-    wl-clipboard
     hunspell
     hunspellDicts.en_US
     antigravity
@@ -62,6 +59,7 @@ in
     fastfetch
     htop
     btop
+    ncdu
   ];
 
   home.file = {
