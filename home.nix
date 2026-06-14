@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
     anthropicSkillRepo = pkgs.fetchFromGitHub{
@@ -6,6 +6,13 @@ let
         repo = "skills";
         rev = "main";
         hash = "sha256-GMXFJSePrpEvhzMQ82YI9Z10BDkuFK/lXUDELclvQ4c="; 
+    };
+
+    obraSuperpowersRepo = pkgs.fetchFromGitHub {
+        owner = "obra";
+        repo = "superpowers";
+        rev = "main"; 
+        hash = "sha256-P/FD8HTQO+QzvMe3A/B2v2vjs8T6ZmIYH3MPp79dSzo=";
     };
 in
 {
@@ -69,7 +76,12 @@ in
     ".agents/skills/pdf".source = "${anthropicSkillRepo}/skills/pdf";
     ".agents/skills/docx".source = "${anthropicSkillRepo}/skills/docx";
     ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
-    ".agents/skills/webapp-testing".source = "${anthropicSkillRepo}/skills/webapp-testing";
+
+    # Obra Superpowers skills
+    ".agents/skills/brainstorming".source = "${obraSuperpowersRepo}/skills/brainstorming";
+    ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
+    ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
+    ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
   };
 
   # --- USER PROGRAMS & DOTFILES ---
