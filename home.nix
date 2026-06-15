@@ -14,6 +14,13 @@ let
         rev = "main"; 
         hash = "sha256-P/FD8HTQO+QzvMe3A/B2v2vjs8T6ZmIYH3MPp79dSzo=";
     };
+
+    vercelAgentBrowserRepo = pkgs.fetchFromGitHub {
+        owner = "vercel-labs";
+        repo = "agent-browser";
+        rev = "main";
+        hash = "sha256-XDTGYcDodP4hQ7fx3dAV2FYhHKIqLuiGz6+gPfgp8Rg="; 
+    };
 in
 {
   # Define your user details
@@ -52,6 +59,7 @@ in
     # Games
     rrootage
     powermanga
+    prismlauncher
     
     # Chrome with your custom Wayland flags
     (google-chrome.override {
@@ -67,6 +75,9 @@ in
     htop
     btop
     ncdu
+
+    # The actual browser automation CLI tool that the agent will invoke
+    agent-browser
   ];
 
   home.file = {
@@ -82,6 +93,9 @@ in
     ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
     ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
     ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
+
+    # Vercel Agent Browser (AI Instructions & Context)
+    ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
   };
 
   # --- USER PROGRAMS & DOTFILES ---
