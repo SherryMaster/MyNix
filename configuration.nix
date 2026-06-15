@@ -158,6 +158,15 @@ in
   environment.sessionVariables = {
     SAL_USE_VCLPLUGIN = "qt6";
     SPARK_HOME = "${pkgs.spark}";
+    LD_LIBRARY_PATH = lib.mkForce (lib.makeLibraryPath (with pkgs; [
+      gtk3 glib cairo pango gdk-pixbuf atk
+      libx11 libxext libxcursor libxrandr libxxf86vm libxrender libxtst libxi
+      libxcomposite libxdamage libxfixes libxft
+      xorg.libXt xorg.libXmu xorg.libXinerama
+      fontconfig freetype zlib
+      glfw libpulseaudio libGL openal vulkan-loader udev alsa-lib
+      stdenv.cc.cc.lib
+    ]));
   };
 
   # System-level dependencies and complex custom derivations stay here
