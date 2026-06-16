@@ -21,6 +21,13 @@ let
         rev = "main";
         hash = "sha256-XDTGYcDodP4hQ7fx3dAV2FYhHKIqLuiGz6+gPfgp8Rg="; 
     };
+
+    browserUseRepo = pkgs.fetchFromGitHub {
+        owner = "browser-use";
+        repo = "browser-use";
+        rev = "main";
+        hash = "sha256-D7pc20JKX3nLajijm+67w6NN6FenhLV6RbTc1YU5LbM="; 
+    };
 in
 {
   # Define your user details
@@ -112,9 +119,9 @@ in
           pango
           gdk-pixbuf
           atk
-          xorg.libXt
-          xorg.libXmu
-          xorg.libXinerama
+          libxt
+          libxmu
+          libxinerama
           alsa-lib
         ];
         driverLink = pkgs.addDriverRunpath.driverLink;
@@ -152,8 +159,23 @@ in
     btop
     ncdu
 
-    # The actual browser automation CLI tool that the agent will invoke
     agent-browser
+    uv
+    chromium
+
+    # browser-use CLI wrapper (installs Python package via uv on first run)
+    (pkgs.writeShellScriptBin "browser-use" ''
+        export PATH="${pkgs.lib.makeBinPath [ pkgs.chromium pkgs.uv pkgs.python3 ]}:$HOME/.local/bin:$PATH"
+        exec ${pkgs.uv}/bin/uv tool run browser-use "$@"
+    '')
+    (pkgs.writeShellScriptBin "bu" ''
+        export PATH="${pkgs.lib.makeBinPath [ pkgs.chromium pkgs.uv pkgs.python3 ]}:$HOME/.local/bin:$PATH"
+        exec ${pkgs.uv}/bin/uv tool run browser-use "$@"
+    '')
+    (pkgs.writeShellScriptBin "browseruse" ''
+        export PATH="${pkgs.lib.makeBinPath [ pkgs.chromium pkgs.uv pkgs.python3 ]}:$HOME/.local/bin:$PATH"
+        exec ${pkgs.uv}/bin/uv tool run browser-use "$@"
+    '')
   ];
 
   home.file = {
@@ -170,8 +192,8 @@ in
     ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
     ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
 
-    # Vercel Agent Browser (AI Instructions & Context)
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
+    ".agents/skills/browser-use".source = "${browserUseRepo}/skills/browser-use";
   };
 
   # --- USER PROGRAMS & DOTFILES ---
