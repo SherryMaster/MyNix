@@ -49,6 +49,12 @@ in
     hunspell
     hunspellDicts.en_US
     antigravity
+    opencode-desktop
+
+    (pkgs.writeShellScriptBin "opencode" ''
+        exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
+    '')
+
     # Games
     rrootage
     powermanga
@@ -62,6 +68,8 @@ in
         "--enable-wayland-ime"
       ];
     })
+
+    # tlauncher with custom LD_LIBRARY_PATH to include JRE's native libs and runtime dependencies
     (pkgs.stdenv.mkDerivation {
       pname = "tlauncher";
       version = "2.924";
@@ -145,6 +153,7 @@ in
     btop
     ncdu
 
+    # tools for AI agents
     agent-browser
   ];
 
