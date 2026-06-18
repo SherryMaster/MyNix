@@ -8,6 +8,13 @@ let
         hash = "sha256-GMXFJSePrpEvhzMQ82YI9Z10BDkuFK/lXUDELclvQ4c="; 
     };
 
+    obraSuperpowersRepo = pkgs.fetchFromGitHub {
+        owner = "obra";
+        repo = "superpowers";
+        rev = "main"; 
+        hash = "sha256-P/FD8HTQO+QzvMe3A/B2v2vjs8T6ZmIYH3MPp79dSzo=";
+    };
+
     vercelAgentBrowserRepo = pkgs.fetchFromGitHub {
         owner = "vercel-labs";
         repo = "agent-browser";
@@ -49,6 +56,7 @@ in
     hunspell
     hunspellDicts.en_US
     antigravity
+    claude-code
 
     (pkgs.writeShellScriptBin "opencode" ''
         exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
@@ -181,12 +189,19 @@ in
     htop
     btop
     ncdu
+    gh
+    uv
 
     # tools for AI agents
     agent-browser
   ];
 
   home.file = {
+
+    #--------------------------
+    #      SKILLS & AGENTS
+    #--------------------------
+
     # Antropic skills
     ".agents/skills/frontend-design".source = "${anthropicSkillRepo}/skills/frontend-design";
     ".agents/skills/pptx".source = "${anthropicSkillRepo}/skills/pptx";
@@ -194,7 +209,19 @@ in
     ".agents/skills/docx".source = "${anthropicSkillRepo}/skills/docx";
     ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
 
+    # Obra Superpowers skills
+    ".agents/skills/brainstorming".source = "${obraSuperpowersRepo}/skills/brainstorming";
+    ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
+    ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
+    ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
+    ".agents/skills/subagent-driven-development".source = "${obraSuperpowersRepo}/skills/subagent-driven-development";
+    
+    # Agent-Browser skill
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
+
+    #--------------------------
+    #     DESKTOP INTEGRATION
+    #--------------------------
 
     # Desktop entry for opencode-desktop (auto-updating)
     ".local/share/applications/opencode-desktop.desktop".text = ''

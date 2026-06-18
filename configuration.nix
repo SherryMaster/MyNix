@@ -25,6 +25,14 @@ in
       # Import Home Manager module
       "${home-manager}/nixos"
     ];
+  
+  nixpkgs.overlays = [
+    (final: prev: {
+      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+        pkgs = prev;
+      };
+    })
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
