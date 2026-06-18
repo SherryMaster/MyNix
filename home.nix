@@ -49,10 +49,39 @@ in
     hunspell
     hunspellDicts.en_US
     antigravity
-    opencode-desktop
 
     (pkgs.writeShellScriptBin "opencode" ''
         exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
+    '')
+
+    # opencode-desktop: always fetch latest from GitHub releases
+    (pkgs.writeShellScriptBin "opencode-desktop" ''
+        set -euo pipefail
+        CACHE_DIR="$HOME/.local/share/opencode-desktop"
+        mkdir -p "$CACHE_DIR"
+
+        LATEST_VERSION=$(${pkgs.curl}/bin/curl -fsSL https://api.github.com/repos/anomalyco/opencode/releases/latest | ${pkgs.jq}/bin/jq -r '.tag_name')
+        CURRENT_VERSION=""
+        [ -f "$CACHE_DIR/.version" ] && CURRENT_VERSION=$(cat "$CACHE_DIR/.version")
+
+        if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+          echo "opencode-desktop: updating ''${CURRENT_VERSION:-none} -> $LATEST_VERSION"
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "x86_64" ]; then
+            ASSET="opencode-desktop-linux-x86_64.AppImage"
+          elif [ "$ARCH" = "aarch64" ]; then
+            ASSET="opencode-desktop-linux-arm64.AppImage"
+          else
+            echo "Unsupported architecture: $ARCH" >&2; exit 1
+          fi
+          URL="https://github.com/anomalyco/opencode/releases/download/$LATEST_VERSION/$ASSET"
+          rm -f "$CACHE_DIR/opencode-desktop.AppImage"
+          ${pkgs.curl}/bin/curl -fSL "$URL" -o "$CACHE_DIR/opencode-desktop.AppImage"
+          chmod +x "$CACHE_DIR/opencode-desktop.AppImage"
+          echo "$LATEST_VERSION" > "$CACHE_DIR/.version"
+        fi
+
+        exec ${pkgs.appimage-run}/bin/appimage-run "$CACHE_DIR/opencode-desktop.AppImage" "$@"
     '')
 
     # Games
@@ -166,6 +195,27 @@ in
     ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
 
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
+
+    # Desktop entry for opencode-desktop (auto-updating)
+    ".local/share/applications/opencode-desktop.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=OpenCode Desktop
+      Exec=opencode-desktop %U
+      Icon=opencode-desktop
+      Terminal=false
+      Categories=Development;IDE;
+      MimeType=x-scheme-handler/opencode;
+      StartupWMClass=opencode-desktop
+    '';
+
+    # Icons from the nixpkgs package (will be replaced on first run)
+    ".local/share/icons/hicolor/128x128/apps/opencode-desktop.png".source = 
+      "${pkgs.opencode-desktop}/share/icons/hicolor/128x128/apps/opencode-desktop.png";
+    ".local/share/icons/hicolor/64x64/apps/opencode-desktop.png".source = 
+      "${pkgs.opencode-desktop}/share/icons/hicolor/64x64/apps/opencode-desktop.png";
+    ".local/share/icons/hicolor/32x32/apps/opencode-desktop.png".source = 
+      "${pkgs.opencode-desktop}/share/icons/hicolor/32x32/apps/opencode-desktop.png";
   };
 
   # --- USER PROGRAMS & DOTFILES ---

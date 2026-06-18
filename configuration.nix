@@ -307,6 +307,11 @@ in
 
   programs.nix-ld.enable = true;
 
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
+
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true; 
