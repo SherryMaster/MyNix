@@ -211,10 +211,19 @@ in
 
     # Obra Superpowers skills
     ".agents/skills/brainstorming".source = "${obraSuperpowersRepo}/skills/brainstorming";
+    ".agents/skills/dispatching-parallel-agents".source = "${obraSuperpowersRepo}/skills/dispatching-parallel-agents";
+    ".agents/skills/finishing-a-development-branch".source = "${obraSuperpowersRepo}/skills/finishing-a-development-branch";
+    ".agents/skills/receiving-code-review".source = "${obraSuperpowersRepo}/skills/receiving-code-review";
+    ".agents/skills/requesting-code-review".source = "${obraSuperpowersRepo}/skills/requesting-code-review";
     ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
     ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
     ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
+    ".agents/skills/test-driven-development".source = "${obraSuperpowersRepo}/skills/test-driven-development";
+    ".agents/skills/using-git-worktrees".source = "${obraSuperpowersRepo}/skills/using-git-worktrees";
+    ".agents/skills/using-superpowers".source = "${obraSuperpowersRepo}/skills/using-superpowers";
     ".agents/skills/subagent-driven-development".source = "${obraSuperpowersRepo}/skills/subagent-driven-development";
+    ".agents/skills/verification-before-completion".source = "${obraSuperpowersRepo}/skills/verification-before-completion";
+    ".agents/skills/writing-skills".source = "${obraSuperpowersRepo}/skills/writing-skills";
     
     # Agent-Browser skill
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
