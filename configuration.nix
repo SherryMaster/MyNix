@@ -369,5 +369,27 @@ in
   services.tailscale.enable = true; 
   # --------------------------------------------------------
 
+  # --- PostgreSQL (for POS App backend) ---
+  # Auto-creates pos_app + pos_app_test databases, sets the postgres
+  # superuser password to "postgres" (matches backend/.env), and allows
+  # passwordless `psql -U postgres` over the local socket while keeping
+  # scram-sha-256 password auth for TCP (used by the Node app).
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "pos_app" "pos_app_test" ];
+    ensureUsers = [
+      {
+        name = "postgres";
+        ensureClauses.password = "postgres";
+      }
+    ];
+    authentication = pkgs.lib.mkOverride 10 ''
+      # TYPE  DATABASE    USER      ADDRESS          METHOD
+      local   all         all                        trust
+      host    all         all       127.0.0.1/32     scram-sha-256
+      host    all         all       ::1/128          scram-sha-256
+    '';
+  };
+
   system.stateVersion = "25.11"; 
 }
