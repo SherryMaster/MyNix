@@ -175,6 +175,9 @@ in
       glfw libpulseaudio libGL openal vulkan-loader udev alsa-lib
       stdenv.cc.cc.lib
     ]));
+    ANDROID_HOME = "$HOME/Android/Sdk";
+    ANDROID_SDK_ROOT = "$HOME/Android/Sdk";
+    JAVA_HOME = "${pkgs.jdk17}/lib/openjdk";
   };
 
   # System-level dependencies and complex custom derivations stay here
@@ -189,7 +192,6 @@ in
   nix-your-shell
   wget
   jq
-  jdk11
   docker-compose
   apacheKafka
   spark
@@ -200,6 +202,10 @@ in
   karere
   unstable.cisco-packet-tracer_9
   unstable.godot
+  android-studio
+  jdk17
+  android-tools
+  watchman
 
   # -- Games --
   # keep system-level games here only if needed for all users
@@ -279,6 +285,7 @@ in
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa07", MODE="0666"
     SUBSYSTEM=="usb", ATTR{idVendor}=="25a7", ATTR{idProduct}=="fa08", MODE="0666"
+    KERNEL=="kvm", MODE="0666"
   '';
 
   services.flatpak.overrides = {
@@ -389,6 +396,14 @@ in
       host    all         all       127.0.0.1/32     scram-sha-256
       host    all         all       ::1/128          scram-sha-256
     '';
+  };
+
+  # Metro bundler watches thousands of files; the default inotify
+  # limit (8192) is too low and causes "ENOSPC: System limit for
+  # number of file watchers reached" errors. 524288 is the value
+  # recommended by the React Native docs.
+  boot.kernel.sysctl = {
+    "fs.inotify.max_user_watches" = 524288;
   };
 
   system.stateVersion = "25.11"; 
