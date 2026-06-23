@@ -206,6 +206,7 @@ in
   jdk17
   android-tools
   watchman
+  scrcpy
 
   # -- Games --
   # keep system-level games here only if needed for all users

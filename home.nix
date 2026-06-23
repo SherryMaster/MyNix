@@ -51,6 +51,17 @@ in
       jupyter
       ipykernel
       ultralytics
+
+      # Office skills dependencies
+      pypdf
+      pdfplumber
+      reportlab
+      pdf2image
+      pytesseract
+      pandas
+      openpyxl
+      pillow
+      markitdown
     ]))
     libnotify
     hunspell
@@ -194,7 +205,18 @@ in
 
     # tools for AI agents
     agent-browser
+
+    # Office skills dependencies
+    poppler-utils   # pdftotext, pdfimages, pdftoppm (PDF/docx/pptx skills)
+    qpdf            # CLI PDF merge/split/rotate (PDF skill)
+    pandoc          # Document text extraction (DOCX skill)
+    tesseract       # OCR engine for scanned PDFs (PDF skill)
   ];
+
+  # NODE_PATH so require('docx') and require('pptxgenjs') work for office skills
+  home.sessionVariables = {
+    NODE_PATH = "${config.home.homeDirectory}/.npm-global/lib/node_modules";
+  };
 
   home.file = {
 
