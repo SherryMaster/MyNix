@@ -21,6 +21,13 @@ let
         rev = "main";
         hash = "sha256-XDTGYcDodP4hQ7fx3dAV2FYhHKIqLuiGz6+gPfgp8Rg="; 
     };
+
+    vercelAgentSkillsRepo = pkgs.fetchFromGitHub {
+        owner = "vercel-labs";
+        repo = "agent-skills";
+        rev = "main";
+        hash = "sha256-LSFC0Zxc4Lgisu5/r6qBF1R0X36hePkVPfbvbx48YdY="; 
+    };
 in
 {
   # Define your user details
@@ -247,6 +254,9 @@ in
     ".agents/skills/verification-before-completion".source = "${obraSuperpowersRepo}/skills/verification-before-completion";
     ".agents/skills/writing-skills".source = "${obraSuperpowersRepo}/skills/writing-skills";
     
+    # Vercel Agent skills
+    ".agents/skills/web-design-guidelines".source = "${vercelAgentSkillsRepo}/skills/web-design-guidelines";
+
     # Agent-Browser skill
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
 

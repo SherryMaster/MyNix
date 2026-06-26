@@ -201,7 +201,6 @@ in
   piper
   karere
   unstable.cisco-packet-tracer_9
-  unstable.godot
   android-studio
   jdk17
   android-tools
@@ -276,6 +275,7 @@ in
   services.flatpak.packages = [
     "org.vinegarhq.Sober"
     "org.freedownloadmanager.Manager"
+    "com.github.Anuken.Mindustry"
   ];
 
   services.flatpak.update.auto = {
