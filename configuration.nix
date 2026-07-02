@@ -170,7 +170,7 @@ in
       gtk3 glib cairo pango gdk-pixbuf atk
       libx11 libxext libxcursor libxrandr libxxf86vm libxrender libxtst libxi
       libxcomposite libxdamage libxfixes libxft
-      xorg.libXt xorg.libXmu xorg.libXinerama
+      libxt libxmu libxinerama
       fontconfig freetype zlib
       glfw libpulseaudio libGL openal vulkan-loader udev alsa-lib
       stdenv.cc.cc.lib
@@ -200,7 +200,6 @@ in
   unzip
   piper
   karere
-  unstable.cisco-packet-tracer_9
   android-studio
   jdk17
   android-tools
@@ -210,30 +209,6 @@ in
   # -- Games --
   # keep system-level games here only if needed for all users
   
-  
-  (pkgs.writeShellScriptBin "packettracer-offline" ''
-      PT_BIN=(${unstable.cisco-packet-tracer_9}/bin/*)
-      exec systemd-run \
-        --user \
-        --wait \
-        --property=PrivateNetwork=yes \
-        --setenv=DISPLAY="''${DISPLAY:-}" \
-        --setenv=WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-}" \
-        --setenv=XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-}" \
-        --setenv=XAUTHORITY="''${XAUTHORITY:-}" \
-        --setenv=DBUS_SESSION_BUS_ADDRESS="''${DBUS_SESSION_BUS_ADDRESS:-}" \
-        "''${PT_BIN[0]}" "$@"
-  '')
-
-  (makeDesktopItem {
-    name = "packettracer-offline-gui";
-    desktopName = "Cisco Packet Tracer (Offline)";
-    exec = "packettracer-offline %f"; 
-    icon = "cisco-packet-tracer-9"; 
-    terminal = false;
-    type = "Application";
-    categories = [ "Network" ];
-  })
   
 
   

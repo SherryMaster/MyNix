@@ -45,6 +45,8 @@ in
     alacritty
     zoom-us
     jetbrains.pycharm
+    inkscape
+    krita
     libreoffice-fresh
     vlc
     nodejs
@@ -69,6 +71,7 @@ in
       openpyxl
       pillow
       markitdown
+      python-docx
     ]))
     libnotify
     hunspell
