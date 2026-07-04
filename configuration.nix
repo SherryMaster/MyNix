@@ -105,14 +105,6 @@ in
   # enable flatpak service
   services.flatpak.enable = true;
 
-  # Configure the Flathub repository
-  services.flatpak.remotes = lib.mkOptionDefault [
-    {
-      name = "flathub";
-      location = "https://dl.flathub.org/repo/flathub.pakrepo";
-    }
-  ];
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.sherry = {
     isNormalUser = true;
@@ -249,7 +241,7 @@ in
   services.ratbagd.enable = true;
   services.flatpak.packages = [
     "org.vinegarhq.Sober"
-    "org.vinegardhq.Vinegar"
+    "org.vinegarhq.Vinegar"
     "org.freedownloadmanager.Manager"
     "com.github.Anuken.Mindustry"
   ];
