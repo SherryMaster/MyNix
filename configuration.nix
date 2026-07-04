@@ -249,6 +249,7 @@ in
   services.ratbagd.enable = true;
   services.flatpak.packages = [
     "org.vinegarhq.Sober"
+    "org.vinegardhq.Vinegar"
     "org.freedownloadmanager.Manager"
     "com.github.Anuken.Mindustry"
   ];
