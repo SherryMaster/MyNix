@@ -28,6 +28,141 @@ let
         rev = "main";
         hash = "sha256-LSFC0Zxc4Lgisu5/r6qBF1R0X36hePkVPfbvbx48YdY="; 
     };
+
+    browserUseRepo = pkgs.fetchFromGitHub {
+        owner = "browser-use";
+        repo = "browser-use";
+        rev = "main";
+        sha256 = "1szyxzszz3ysrn0sknp75i79v0p0rmjplzn5w422c9n6yb72vzsy";
+    };
+
+    # Custom Python packages for browser-use (not in nixpkgs)
+    # NB: underscore names because Nix let bindings don't allow hyphens
+    uuid7 = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "uuid7";
+      version = "0.1.0";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/5c/19/7472bd526591e2192926247109dbf78692e709d3e56775792fec877a7720/uuid7-0.1.0.tar.gz";
+        hash = "sha256-jFeqMu50VtPMaMlcRTC8VxZG3vrAGJXPxzVFRJiUpjw=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ setuptools ];
+      doCheck = false;
+    };
+
+    bubus = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "bubus";
+      version = "1.5.6";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/2d/85/aa72d1ffced7402fe41805519dab9935e9ce2bce18a10a55f2273ba8ba59/bubus-1.5.6.tar.gz";
+        hash = "sha256-GlRW8KV26GYTp71m6BmJG2d3eDILbikQlOM5sNnfLg0=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ hatchling ];
+      propagatedBuildInputs = (with pkgs.python3.pkgs; [
+        aiofiles anyio portalocker pydantic
+      ]) ++ [ pkgs.python3.pkgs."typing-extensions" uuid7 ];
+      doCheck = false;
+    };
+
+    cdp_use = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "cdp-use";
+      version = "1.4.5";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/f7/7a/c549417e8c5e4dface6d5d828cd7dc72502dcea33a99f5324abf5a853ce9/cdp_use-1.4.5.tar.gz";
+        hash = "sha256-DaOjLfRjNqA/9aIrxrxELNfS8tUKEY/UhW8p039tJqA=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ hatchling ];
+      propagatedBuildInputs = (with pkgs.python3.pkgs; [
+        httpx websockets
+      ]) ++ [ pkgs.python3.pkgs."typing-extensions" ];
+      doCheck = false;
+    };
+
+    fetch_use = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "fetch-use";
+      version = "0.4.0";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/5d/2d/66784fa8b66a04f170ad8f6598688b30b3a194dad4185b36d53da4ae1505/fetch_use-0.4.0.tar.gz";
+        hash = "sha256-lRGYfUkH7G2sUB4h1mlG0QCY9mtdIbwqukGJzYG6GJo=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ hatchling ];
+      doCheck = false;
+    };
+
+    browser_use_sdk = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "browser-use-sdk";
+      version = "3.4.2";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/1d/f0/e897f4b75d76c96017f0cff4d7264426ae5f7e26ad68656e2731b9c166a7/browser_use_sdk-3.4.2.tar.gz";
+        hash = "sha256-vgULyAOzHsTp8j39cdncXxFg197AuWIyeRXK90OhAgg=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ hatchling ];
+      propagatedBuildInputs = with pkgs.python3.pkgs; [ httpx pydantic ];
+      doCheck = false;
+    };
+
+    browser_harness = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "browser-harness";
+      version = "0.1.4";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/dd/96/a50549ee42ee79cb2de718cecbc162cd710c6bb4cd680bedb014c2983ca9/browser_harness-0.1.4.tar.gz";
+        hash = "sha256-Znd5vnun4Z9nbwz5NlPyjzQO9p+mb3O1aqsSnNHD0T8=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ setuptools ];
+      propagatedBuildInputs = (with pkgs.python3.pkgs; [
+        pillow websockets
+      ]) ++ [ fetch_use cdp_use ];
+      dontCheckRuntimeDeps = 1;
+      doCheck = false;
+      # Subprocess daemon needs PYTHONPATH since Nix wrappers use site.addsitedir()
+      postFixup = ''
+        wrapProgram $out/bin/browser-harness \
+          --set PYTHONPATH "$(grep -o "'[^']*python3\.[0-9]*/site-packages'" $out/bin/.browser-harness-wrapped | tr -d "'" | paste -sd:)"
+      '';
+    };
+
+    browser_use = pkgs.python3.pkgs.buildPythonPackage rec {
+      pname = "browser-use";
+      version = "0.13.3";
+      src = pkgs.fetchurl {
+        url = "https://files.pythonhosted.org/packages/3c/dd/c4f16a3a7f4cf4607b6736960d2174eefa82b9e05124b1ce25f34c8424b3/browser_use-0.13.3.tar.gz";
+        hash = "sha256-uItneyI00cdgH24FyE+1dncjv0xexO0SqxuIDtgiGBE=";
+      };
+      format = "pyproject";
+      nativeBuildInputs = with pkgs.python3.pkgs; [ hatchling ];
+      propagatedBuildInputs = (with pkgs.python3.pkgs; [
+        aiohttp anyio click rich httpx psutil pydantic
+        requests pillow openai anthropic mcp
+        posthog screeninfo groq ollama
+        markdownify cloudpickle pyotp pypdf reportlab
+        websockets inquirerpy
+      ]) ++ (let py = pkgs.python3.pkgs; in [
+        py."python-dotenv"
+        py."typing-extensions"
+        py."google-genai"
+        py."python-docx"
+        py."google-api-python-client"
+        py."google-auth"
+        py."google-auth-oauthlib"
+      ]) ++ [ uuid7 bubus cdp_use browser_use_sdk browser_harness ];
+      dontCheckRuntimeDeps = 1;
+      doCheck = false;
+      postFixup = ''
+        wrapProgram $out/bin/browser-use \
+          --set PYTHONPATH "$(grep -o "'[^']*python3\.[0-9]*/site-packages'" $out/bin/.browser-use-wrapped | tr -d "'" | paste -sd:)"
+        wrapProgram $out/bin/browser \
+          --set PYTHONPATH "$(grep -o "'[^']*python3\.[0-9]*/site-packages'" $out/bin/.browser-wrapped | tr -d "'" | paste -sd:)"
+        wrapProgram $out/bin/browseruse \
+          --set PYTHONPATH "$(grep -o "'[^']*python3\.[0-9]*/site-packages'" $out/bin/.browseruse-wrapped | tr -d "'" | paste -sd:)"
+        wrapProgram $out/bin/bu \
+          --set PYTHONPATH "$(grep -o "'[^']*python3\.[0-9]*/site-packages'" $out/bin/.bu-wrapped | tr -d "'" | paste -sd:)"
+      '';
+    };
 in
 {
   # Define your user details
@@ -221,6 +356,9 @@ in
     qpdf            # CLI PDF merge/split/rotate (PDF skill)
     pandoc          # Document text extraction (DOCX skill)
     tesseract       # OCR engine for scanned PDFs (PDF skill)
+
+    # Vision-based browser automation via browser-use
+    browser_use     # CLI: browser-use <<'PY' ... PY
   ];
 
   # NODE_PATH so require('docx') and require('pptxgenjs') work for office skills
@@ -262,6 +400,9 @@ in
 
     # Agent-Browser skill
     ".agents/skills/agent-browser".source = "${vercelAgentBrowserRepo}/skills/agent-browser";
+
+    # Browser-Use skill
+    ".agents/skills/browser-use".source = "${browserUseRepo}/skills/browser-use";
 
     #--------------------------
     #     DESKTOP INTEGRATION
