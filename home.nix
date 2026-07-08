@@ -195,6 +195,7 @@ in
       jupyter
       ipykernel
       ultralytics
+      pyside6
 
       # Office skills dependencies
       pypdf
