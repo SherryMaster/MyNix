@@ -214,6 +214,7 @@ in
     hunspellDicts.en_US
     antigravity
     claude-code
+    unityhub
 
     (pkgs.writeShellScriptBin "opencode" ''
         exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
