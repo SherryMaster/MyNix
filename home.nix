@@ -180,6 +180,7 @@ in
     alacritty
     zoom-us
     jetbrains.pycharm
+    jetbrains.rider
     inkscape
     krita
     libreoffice-fresh
@@ -216,6 +217,7 @@ in
     claude-code
     codex
     unityhub
+    dotnet-sdk
 
     (pkgs.writeShellScriptBin "opencode" ''
         exec ${pkgs.nodejs}/bin/npx -y opencode-ai@latest "$@"
