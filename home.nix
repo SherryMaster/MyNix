@@ -214,6 +214,7 @@ in
     hunspellDicts.en_US
     antigravity
     claude-code
+    codex
     unityhub
 
     (pkgs.writeShellScriptBin "opencode" ''
