@@ -54,6 +54,15 @@ in
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
 
+  # Enable OpenGL and Vulkan drivers
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver  # Broadwell (2014) or newer (iHD)
+      intel-vaapi-driver  # Older legacy driver (i965)
+    ];
+  };
+
   # Enable input daemon for Nintendo Switch Pro Controllers & Joy-Cons
   services.joycond.enable = true;
 
@@ -170,6 +179,7 @@ in
     ANDROID_HOME = "$HOME/Android/Sdk";
     ANDROID_SDK_ROOT = "$HOME/Android/Sdk";
     JAVA_HOME = "${pkgs.jdk17}/lib/openjdk";
+    LIBVA_DRIVER_NAME = "iHD";
   };
 
   # System-level dependencies and complex custom derivations stay here
