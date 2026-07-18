@@ -186,6 +186,7 @@ in
     libreoffice-fresh
     vlc
     nodejs
+    melonloader-installer
     (python3.withPackages (ps: with ps; [ 
       pip 
       virtualenv 
@@ -214,8 +215,6 @@ in
     hunspell
     hunspellDicts.en_US
     antigravity
-    claude-code
-    codex
     unityhub
     dotnet-sdk
 
@@ -251,6 +250,45 @@ in
         fi
 
         exec ${pkgs.appimage-run}/bin/appimage-run "$CACHE_DIR/opencode-desktop.AppImage" "$@"
+    '')
+
+    # claude-code: always fetch latest native binary from Anthropic's download servers
+    (pkgs.writeShellScriptBin "claude" ''
+        set -euo pipefail
+        CACHE_DIR="$HOME/.local/share/claude-code"
+        mkdir -p "$CACHE_DIR"
+
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "x86_64" ]; then
+          PLATFORM="linux-x64"
+        elif [ "$ARCH" = "aarch64" ]; then
+          PLATFORM="linux-arm64"
+        else
+          echo "Unsupported architecture: $ARCH" >&2; exit 1
+        fi
+
+        LATEST_VERSION=$(${pkgs.curl}/bin/curl -fsSL https://downloads.claude.ai/claude-code-releases/latest)
+        CURRENT_VERSION=""
+        [ -f "$CACHE_DIR/.version" ] && CURRENT_VERSION=$(cat "$CACHE_DIR/.version")
+
+        if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+          echo "claude-code: updating ''${CURRENT_VERSION:-none} -> $LATEST_VERSION"
+          MANIFEST=$(${pkgs.curl}/bin/curl -fsSL "https://downloads.claude.ai/claude-code-releases/$LATEST_VERSION/manifest.json")
+          CHECKSUM=$(echo "$MANIFEST" | ${pkgs.jq}/bin/jq -r ".platforms[\"$PLATFORM\"].checksum // empty")
+          if [ -z "$CHECKSUM" ] || [[ ! "$CHECKSUM" =~ ^[a-f0-9]{64}$ ]]; then
+            echo "Platform $PLATFORM not found in manifest" >&2; exit 1
+          fi
+          ${pkgs.curl}/bin/curl -fSL "https://downloads.claude.ai/claude-code-releases/$LATEST_VERSION/$PLATFORM/claude" -o "$CACHE_DIR/claude.new"
+          ACTUAL=$(sha256sum "$CACHE_DIR/claude.new" | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$CHECKSUM" ]; then
+            echo "Checksum verification failed" >&2; rm -f "$CACHE_DIR/claude.new"; exit 1
+          fi
+          chmod +x "$CACHE_DIR/claude.new"
+          mv -f "$CACHE_DIR/claude.new" "$CACHE_DIR/claude"
+          echo "$LATEST_VERSION" > "$CACHE_DIR/.version"
+        fi
+
+        exec "$CACHE_DIR/claude" "$@"
     '')
 
     # Games
@@ -352,6 +390,7 @@ in
     ncdu
     gh
     uv
+    xkill
 
     # tools for AI agents
     agent-browser
@@ -385,20 +424,20 @@ in
     ".agents/skills/xlsx".source = "${anthropicSkillRepo}/skills/xlsx";
 
     # Obra Superpowers skills
-    ".agents/skills/brainstorming".source = "${obraSuperpowersRepo}/skills/brainstorming";
-    ".agents/skills/dispatching-parallel-agents".source = "${obraSuperpowersRepo}/skills/dispatching-parallel-agents";
-    ".agents/skills/finishing-a-development-branch".source = "${obraSuperpowersRepo}/skills/finishing-a-development-branch";
-    ".agents/skills/receiving-code-review".source = "${obraSuperpowersRepo}/skills/receiving-code-review";
-    ".agents/skills/requesting-code-review".source = "${obraSuperpowersRepo}/skills/requesting-code-review";
-    ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
-    ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
-    ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
-    ".agents/skills/test-driven-development".source = "${obraSuperpowersRepo}/skills/test-driven-development";
-    ".agents/skills/using-git-worktrees".source = "${obraSuperpowersRepo}/skills/using-git-worktrees";
-    ".agents/skills/using-superpowers".source = "${obraSuperpowersRepo}/skills/using-superpowers";
-    ".agents/skills/subagent-driven-development".source = "${obraSuperpowersRepo}/skills/subagent-driven-development";
-    ".agents/skills/verification-before-completion".source = "${obraSuperpowersRepo}/skills/verification-before-completion";
-    ".agents/skills/writing-skills".source = "${obraSuperpowersRepo}/skills/writing-skills";
+    # ".agents/skills/brainstorming".source = "${obraSuperpowersRepo}/skills/brainstorming";
+    # ".agents/skills/dispatching-parallel-agents".source = "${obraSuperpowersRepo}/skills/dispatching-parallel-agents";
+    # ".agents/skills/finishing-a-development-branch".source = "${obraSuperpowersRepo}/skills/finishing-a-development-branch";
+    # ".agents/skills/receiving-code-review".source = "${obraSuperpowersRepo}/skills/receiving-code-review";
+    # ".agents/skills/requesting-code-review".source = "${obraSuperpowersRepo}/skills/requesting-code-review";
+    # ".agents/skills/writing-plans".source = "${obraSuperpowersRepo}/skills/writing-plans";
+    # ".agents/skills/executing-plans".source = "${obraSuperpowersRepo}/skills/executing-plans";
+    # ".agents/skills/systematic-debugging".source = "${obraSuperpowersRepo}/skills/systematic-debugging";
+    # ".agents/skills/test-driven-development".source = "${obraSuperpowersRepo}/skills/test-driven-development";
+    # ".agents/skills/using-git-worktrees".source = "${obraSuperpowersRepo}/skills/using-git-worktrees";
+    # ".agents/skills/using-superpowers".source = "${obraSuperpowersRepo}/skills/using-superpowers";
+    # ".agents/skills/subagent-driven-development".source = "${obraSuperpowersRepo}/skills/subagent-driven-development";
+    # ".agents/skills/verification-before-completion".source = "${obraSuperpowersRepo}/skills/verification-before-completion";
+    # ".agents/skills/writing-skills".source = "${obraSuperpowersRepo}/skills/writing-skills";
     
     # Vercel Agent skills
     ".agents/skills/web-design-guidelines".source = "${vercelAgentSkillsRepo}/skills/web-design-guidelines";
