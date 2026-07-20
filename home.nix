@@ -291,6 +291,57 @@ in
         exec "$CACHE_DIR/claude" "$@"
     '')
 
+    # ocgo: always fetch latest from GitHub releases
+    # Small Go CLI for using OpenCode Go subscription from Claude Code or Codex CLI.
+    # After `home-manager switch`, run `ocgo setup` once to store your API key,
+    # then use `ocgo launch claude --model <model>` to run Claude Code via
+    # the local OpenCode Go proxy (listens on 127.0.0.1:3456).
+    (pkgs.writeShellScriptBin "ocgo" ''
+        set -euo pipefail
+        CACHE_DIR="$HOME/.local/share/ocgo"
+        mkdir -p "$CACHE_DIR"
+
+        LATEST_VERSION=$(${pkgs.curl}/bin/curl -fsSL https://api.github.com/repos/emanuelcasco/ocgo/releases/latest | ${pkgs.jq}/bin/jq -r '.tag_name')
+        CURRENT_VERSION=""
+        [ -f "$CACHE_DIR/.version" ] && CURRENT_VERSION=$(cat "$CACHE_DIR/.version")
+
+        if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+          echo "ocgo: updating ''${CURRENT_VERSION:-none} -> $LATEST_VERSION"
+          ARCH=$(uname -m)
+          case "$ARCH" in
+            x86_64)  PLATFORM="linux_x86_64" ;;
+            aarch64) PLATFORM="linux_arm64" ;;
+            *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+          esac
+
+          VERSION_NO_V="''${LATEST_VERSION#v}"
+          ASSET="ocgo_''${VERSION_NO_V}_''${PLATFORM}.tar.gz"
+          BASE_URL="https://github.com/emanuelcasco/ocgo/releases/download/$LATEST_VERSION"
+
+          ${pkgs.curl}/bin/curl -fSL "$BASE_URL/checksums.txt" -o "$CACHE_DIR/checksums.txt.new"
+          EXPECTED=$(${pkgs.gnugrep}/bin/grep -F "$ASSET" "$CACHE_DIR/checksums.txt.new" | head -1 | cut -d' ' -f1)
+          if [ -z "$EXPECTED" ]; then
+            echo "Could not find checksum for $ASSET" >&2
+            rm -f "$CACHE_DIR/checksums.txt.new"
+            exit 1
+          fi
+          ${pkgs.curl}/bin/curl -fSL "$BASE_URL/$ASSET" -o "$CACHE_DIR/ocgo.tar.gz.new"
+          ACTUAL=$(sha256sum "$CACHE_DIR/ocgo.tar.gz.new" | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "Checksum verification failed (expected $EXPECTED, got $ACTUAL)" >&2
+            rm -f "$CACHE_DIR/ocgo.tar.gz.new" "$CACHE_DIR/checksums.txt.new"
+            exit 1
+          fi
+
+          ${pkgs.gnutar}/bin/tar -xzf "$CACHE_DIR/ocgo.tar.gz.new" -C "$CACHE_DIR" --strip-components=1 --exclude='._*'
+          chmod +x "$CACHE_DIR/ocgo"
+          rm -f "$CACHE_DIR/ocgo.tar.gz.new" "$CACHE_DIR/checksums.txt.new"
+          echo "$LATEST_VERSION" > "$CACHE_DIR/.version"
+        fi
+
+        exec "$CACHE_DIR/ocgo" "$@"
+    '')
+
     # Games
     rrootage
     powermanga
