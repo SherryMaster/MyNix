@@ -7,6 +7,11 @@
 let
   nix-flatpak = builtins.fetchTarball "https://github.com/gmodena/nix-flatpak/archive/refs/tags/v0.7.0.tar.gz";
 
+  # Codex Desktop and its CLI are pinned for reproducible system rebuilds.
+  codexDesktopLinux = builtins.getFlake "github:ilysenko/codex-desktop-linux/aa1b7b832fe30ed9e98132b4ec51984fb3a1b38c";
+  codexCliNix = builtins.getFlake "github:sadjow/codex-cli-nix/bd1773d0f796c93de7f4f00ea6c2469e95e44b62";
+  codexCli = codexCliNix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
   # Define the unstable channel declaratively
   unstable = import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz") {
     config = config.nixpkgs.config;
@@ -24,6 +29,8 @@ in
       "${nix-flatpak}/modules/nixos.nix"
       # Import Home Manager module
       "${home-manager}/nixos"
+      # Import the Codex Desktop for Linux NixOS module
+      codexDesktopLinux.nixosModules.default
     ];
   
   nixpkgs.overlays = [
@@ -151,6 +158,12 @@ in
   # Install firefox.
   programs.firefox.enable = true;
 
+  # Install Codex Desktop and bake the declarative CLI path into its launcher.
+  programs.codexDesktopLinux = {
+    enable = true;
+    cliPackage = codexCli;
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   
@@ -184,6 +197,7 @@ in
 
   # System-level dependencies and complex custom derivations stay here
   environment.systemPackages = with pkgs; [
+  codexCli
   # --- C/C++ Global Toolchain ---
   gcc           
   gnumake       
