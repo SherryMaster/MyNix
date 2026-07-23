@@ -16,6 +16,35 @@ let
   unstable = import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz") {
     config = config.nixpkgs.config;
   };
+
+  # AnyDesk's tarball CDN rejects automated fetches; use its official Debian repository.
+  anydeskFromDeb = unstable.anydesk.overrideAttrs {
+    src = pkgs.fetchurl {
+      url = "https://deb.anydesk.com/pool/main/a/anydesk/anydesk_8.0.4_amd64.deb";
+      hash = "sha256-jZMiKdGGi675sXqw/C3GIU8+rcv93oVV7d4MjqyPOMM=";
+    };
+
+    unpackPhase = ''
+      ar x $src
+      tar -xf data.tar.*
+    '';
+
+    postPatch = ''
+      substituteInPlace usr/share/anydesk/files/systemd/anydesk.service \
+        --replace-fail "/usr/bin/anydesk" "$out/bin/anydesk"
+    '';
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/bin $out/share $out/lib/systemd/system
+      install -m755 usr/bin/anydesk $out/bin/anydesk
+      cp -r usr/share/icons usr/share/pixmaps usr/share/polkit-1 $out/share/
+      cp usr/share/anydesk/files/systemd/anydesk.service $out/lib/systemd/system/
+
+      runHook postInstall
+    '';
+  };
   
   # Fetch Home Manager source (Pinned to match your system version)
   home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-26.05.tar.gz";
@@ -221,6 +250,7 @@ in
   android-tools
   watchman
   scrcpy
+  anydeskFromDeb
 
   # -- Games --
   # keep system-level games here only if needed for all users
