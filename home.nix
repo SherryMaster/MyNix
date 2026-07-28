@@ -182,7 +182,7 @@ in
     jetbrains.pycharm
     jetbrains.rider
     inkscape
-    krita
+    aseprite
     libreoffice-fresh
     vlc
     nodejs
@@ -468,7 +468,7 @@ in
     #--------------------------
 
     # Antropic skills
-    ".agents/skills/frontend-design".source = "${anthropicSkillRepo}/skills/frontend-design";
+    # ".agents/skills/frontend-design".source = "${anthropicSkillRepo}/skills/frontend-design";
     ".agents/skills/pptx".source = "${anthropicSkillRepo}/skills/pptx";
     ".agents/skills/pdf".source = "${anthropicSkillRepo}/skills/pdf";
     ".agents/skills/docx".source = "${anthropicSkillRepo}/skills/docx";
