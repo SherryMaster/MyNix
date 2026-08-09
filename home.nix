@@ -186,6 +186,7 @@ in
     libreoffice-fresh
     vlc
     nodejs
+    wrangler
     melonloader-installer
     (python3.withPackages (ps: with ps; [ 
       pip 

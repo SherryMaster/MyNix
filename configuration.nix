@@ -237,6 +237,8 @@ in
   nix-your-shell
   wget
   jq
+  openssl
+  ripgrep
   docker-compose
   apacheKafka
   spark
@@ -251,6 +253,7 @@ in
   watchman
   scrcpy
   anydeskFromDeb
+  wl-clipboard
 
   # -- Games --
   # keep system-level games here only if needed for all users
