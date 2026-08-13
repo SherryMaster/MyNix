@@ -60,6 +60,9 @@ in
       "${home-manager}/nixos"
       # Import the Codex Desktop for Linux NixOS module
       codexDesktopLinux.nixosModules.default
+
+      # Modules for additional services and configurations
+      ./modules/git-changes.nix
     ];
   
   nixpkgs.overlays = [
