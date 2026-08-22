@@ -296,6 +296,39 @@ in
           "''${gappsWrapperArgs[@]}"
       '';
     })
+
+    # personel
+
+    (writeShellScriptBin "rblx" ''
+    if [ "$#" -ne 1 ]; then
+      echo "Usage:"
+      echo "  rblx <place-id>"
+      echo "  rblx <roblox-game-url>"
+      exit 1
+    fi
+
+    input="$1"
+
+    # Direct numeric place ID
+    if [[ "$input" =~ ^[0-9]+$ ]]; then
+      place_id="$input"
+
+    # Roblox game URL
+    elif [[ "$input" =~ roblox\.com/games/([0-9]+) ]]; then
+      place_id="''${BASH_REMATCH[1]}"
+
+    else
+      echo "Could not determine Roblox place ID from:"
+      echo "$input"
+      exit 1
+    fi
+
+    echo "Launching Roblox place $place_id..."
+
+    sudo waydroid shell -- am start \
+      -a android.intent.action.VIEW \
+      -d "roblox://placeId=$place_id"
+  '')
  ];
 
   services.ratbagd.enable = true;
